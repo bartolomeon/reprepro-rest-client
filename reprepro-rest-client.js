@@ -24,11 +24,11 @@ var reprepro = {
 
     sh.cd(config.reprepro.homeDir);
     sh.exec('reprepro ls "'+packageName+'"', function(status, result) {
-	if (!status) { //0 = success
-		deferred.resolve(result);
-	} else {
-		deferred.reject(result);
-	}
+      if (!status) { //0 = success
+        deferred.resolve(result);
+      } else {
+        deferred.reject(result);
+      }
     });
 
     return deferred.promise;
@@ -63,7 +63,7 @@ app.get('/reprepro/:packagename', function(req, res) {
 
   var p = reprepro.findPackage(packageName);
   p.then( function(result) {
-	res.send(result);
+    res.send(result);
   });
 
 });
