@@ -12,23 +12,25 @@ var reprepro = {
   EXEC_NAME : "reprepro",
 
   verifyPackageName : function(packageName) {
-    return /^[\x00-\x7F;]+$/.test(packageName) && /^[^;\s]/.test(packageName);
+    var deferred = q.defer();
+    if (  /^[\x00-\x7F;]+$/.test(packageName) && /^[^;\s]/.test(packageName) ) {
+	deferred.resolve();
+    } else {
+      deferred.reject(new Error('Invalid package name format given!'));
+    }
+    return deferred.promise;
   },
 
   findPackage : function(packageName) {
     var deferred = q.defer();
 
-    if (!this.verifyPackageName(packageName)) {
-      console.error( new Error('Invalid package name format given!'))
-    }
-
     sh.cd(config.reprepro.homeDir);
     sh.exec('reprepro ls "'+packageName+'"', function(status, result) {
-	if (!status) { //0 = success
-		deferred.resolve(result);
-	} else {
-		deferred.reject(result);
-	}
+      if (!status) { //0 = success
+	deferred.resolve(result);
+      } else {
+	deferred.reject(result);
+      }
     });
 
     return deferred.promise;
@@ -61,12 +63,17 @@ app.get('/', function (req, res) {
 app.get('/reprepro/:packagename', function(req, res) {
   var packageName = req.params.packagename;
 
-  var p = reprepro.findPackage(packageName);
-  p.then( function(result) {
+  reprepro.verifyPackageName(packageName)
+  .then(reprepro.findPackage(packageName))
+  .then( function(result) {
 	res.send(result);
-  });
+  }).catch(function(error) {
+	res.status = 400;
+	res.send(JSON.stringify(error));
+  }).done();
 
 });
+
 
 
 app.listen(3000);
