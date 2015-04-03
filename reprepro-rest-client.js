@@ -16,16 +16,22 @@ var reprepro = {
   },
 
   findPackage : function(packageName) {
-    var deffered = q.defer();
+    var deferred = q.defer();
 
     if (!this.verifyPackageName(packageName)) {
       console.error( new Error('Invalid package name format given!'))
     }
 
     sh.cd(config.reprepro.homeDir);
-    sh.exec('reprepro ls "'+packageName+'"', function(r) {});
+    sh.exec('reprepro ls "'+packageName+'"', function(status, result) {
+	if (!status) { //0 = success
+		deferred.resolve(result);
+	} else {
+		deferred.reject(result);
+	}
+    });
 
-    return deffered.promise;
+    return deferred.promise;
   },
 
   checkIfInstalled : function() {
@@ -34,7 +40,7 @@ var reprepro = {
       sh.exit(1);
     }
 
-    if (sh.test('-d', config.reprepro.homeDir)) {
+    if (!sh.test('-d', config.reprepro.homeDir)) {
       console.error( new Error('Cannot find root directory for reprepro: '+config.reprepro.homeDir));
       sh.exit(1);
     }
@@ -56,6 +62,9 @@ app.get('/reprepro/:packagename', function(req, res) {
   var packageName = req.params.packagename;
 
   var p = reprepro.findPackage(packageName);
+  p.then( function(result) {
+	res.send(result);
+  });
 
 });
 
