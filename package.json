@@ -1,0 +1,10 @@
+{
+  "name": "reprepro-rest-client",
+  "version": "0.0.1",
+  "dependencies": {
+    "express" : "~4.12.0",
+    "q" : "~1.2.0",
+    "shelljs" : "~0.4.0",
+    "underscore" : "~1.5.0"
+  }
+}
