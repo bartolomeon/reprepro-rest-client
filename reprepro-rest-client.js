@@ -22,9 +22,9 @@ var reprepro = {
     sh.exec('reprepro ls "'+packageName+'"', function(status, result) {
 
       if (!status) { //0 = success
-	deferred.resolve(result);
+        deferred.resolve(result);
       } else {
-	deferred.reject(result);
+        deferred.reject(result);
       }
     });
 
@@ -48,18 +48,18 @@ reprepro.checkIfInstalled();
 app.get('/reprepro/:packagename', function(req, res) {
   var packageName = req.params.packagename;
 
-   if (!reprepro.verifyPackageName(packageName)) {
-	res.status(400).send('Invalid characters used');
-   } else {
-     reprepro.findPackage(packageName)
-     .then(function(result) {
-	var out =
-	  _.filter(result.split('\n'), function(line) {return line.length>0;})
-	  .map(function(line) { return _.invoke(line.split('|'), 'trim').slice(1,2); } );
-	res.send({ versions : _.flatten(out) } );
-     }).fail(function(error) {
-	res.status(400).send(JSON.stringify(error));
-     }).done();
+  if (!reprepro.verifyPackageName(packageName)) {
+    res.status(400).send('Invalid characters used');
+  } else {
+    reprepro.findPackage(packageName)
+    .then(function(result) {
+      var out =
+        _.filter(result.split('\n'), function(line) {return line.length>0;})
+      .map(function(line) { return _.invoke(line.split('|'), 'trim').slice(1,2); } );
+      res.send({ versions : _.flatten(out) } );
+    }).fail(function(error) {
+      res.status(400).send(JSON.stringify(error));
+    }).done();
   } 
 });
 
